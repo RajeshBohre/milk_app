@@ -8,7 +8,7 @@ var bodyParser = require('body-parser');
 var mongo = require("mongoose");
 const { type } = require('os');
 mongo.set('debug', true);
-const DB = "mongodb://localhost:27017/milkhisab"
+const DB = "mongodb+srv://rajeshkh76:rajesh@cluster0.2e8kjso.mongodb.net/milkhisab?retryWrites=true&w=majority"
 //const DB = "mongodb+srv://rajeshkh76:rajesh@cluster0.2e8kjso.mongodb.net/medicalbill?retryWrites=true&w=majority"
 // var db = mongo.connect(DB, function (err, response) {
 //     if (err) { console.log(err); }
