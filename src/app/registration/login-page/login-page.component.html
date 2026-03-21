@@ -1,0 +1,20 @@
+<h3 style="text-align: center;" *ngIf="!loading">{{isRegistration ? 'User Registration' : 'User Login'}}</h3>
+<div style="display: flex; text-align: center; justify-content: center;">
+
+<div class="login-container" *ngIf="!isRegistration">
+        <form action="#" method="POST" class="login-form">
+            <h2>{{isRegistration ? 'Register' : 'Login'}}</h2>
+            <div class="input-group">
+                <label for="username">Username</label>
+                <input type="text" [(ngModel)]="userName" id="username" name="username" required>
+            </div>
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" [(ngModel)]="password" id="password" name="password" required>
+            </div>
+            <button type="submit" (click)="onFormSubmit()">Login</button>
+            <div class="form-footer">
+                <button type="button" (click)="onRegister()">Register</button>
+            </div>
+        </form>
+    </div>

@@ -1,0 +1,22 @@
+<div class="bill-form-wrapper">
+    <div class="form-header">Payment Form</div>
+
+    <form>
+        <div class="form-row">
+            <label for="Name">Name</label>
+            <input id="Name" name="Name" [(ngModel)]="Name" type="text" placeholder="Enter name" required />
+        </div>
+        <div class="form-row">
+            <label for="milkType">Amount</label>
+            <input id="amount" name="amount" [(ngModel)]="amount" type="text" placeholder="Enter amount" required />
+        </div>
+        <div class="form-row">
+            <label for="paymentDate">Date</label>
+            <input id="paymentDate" name="paymentDate" [(ngModel)]="paymentDate" type="date" required />
+        </div>
+        <div class="actions">
+            <button type="submit" (click)="onSubmit()">Save</button>
+             <button style="margin-left: 10px;" type="submit" (click)="backToList()">Back</button>
+        </div>
+    </form>
+</div>
