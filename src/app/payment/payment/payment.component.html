@@ -10,6 +10,14 @@
             <label for="milkType">Amount</label>
             <input id="amount" name="amount" [(ngModel)]="amount" type="text" placeholder="Enter amount" required />
         </div>
+        <div *ngIf="isMultiplePayments" class="form-row">
+            <label for="startDate">Start Date</label>
+            <input id="startDate" name="startDate" [(ngModel)]="startDate" type="date" required />
+        </div>
+        <div *ngIf="isMultiplePayments" class="form-row">
+            <label for="endDate">End Date</label>
+            <input id="endDate" name="endDate" [(ngModel)]="endDate" type="date" required />
+        </div>
         <div class="form-row">
             <label for="paymentDate">Date</label>
             <input id="paymentDate" name="paymentDate" [(ngModel)]="paymentDate" type="date" required />

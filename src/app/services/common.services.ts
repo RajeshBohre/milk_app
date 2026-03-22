@@ -7,7 +7,8 @@ import { catchError } from 'rxjs/operators';
 })
 export class CommonService {
     // baseUrl should point to your backend (set in environment.ts)
-    private baseUrl: string = 'http://localhost:8084/api';
+    //private baseUrl: string = 'http://localhost:8084/api';
+    private baseUrl: string = 'https://milk-app-i64g.onrender.com/api';
 
     constructor(private http: HttpClient) {}
     userRegister(req: any): Observable<any> {
@@ -58,6 +59,12 @@ export class CommonService {
         const url = `${this.baseUrl}/paymentEntry`;
         const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
         return this.http.post<any>(url, req, { headers }).pipe(
+            catchError(this.handleError)
+        );
+    }
+    getPaymentDetails(req: any): Observable<any> {
+        const url = `${this.baseUrl}/getPaymentEntry/${req.userName}`; // adjust route to match your backend
+        return this.http.get<any>(url).pipe(
             catchError(this.handleError)
         );
     }

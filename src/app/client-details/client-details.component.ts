@@ -77,7 +77,7 @@ export class ClientDetailsComponent implements OnInit {
   getPatients(): void {
     this.loading = true;
     this.error = null;
-
+    
     this.commonService.getDetailsMilkMan(this.loggedInUser).subscribe({
       next: (data) => {
         const formatDate = (val: any): string => {
@@ -108,7 +108,15 @@ createClient(): void {
   editClient(): void {
     if (!this.gridApi) { return; }
     const selectedNodes = this.gridApi.getSelectedNodes();
-    if (!selectedNodes || selectedNodes.length === 0) { return; }
+    if (selectedNodes[0].data.paymentStatus === 'paid') {
+      alert('Cannot edit a paid bill.');
+      return;
+    }
+    if (!selectedNodes || selectedNodes.length === 0) { 
+      this.router.navigate(['add-client']);
+      return; 
+    }
+    
     const id = selectedNodes[0].data._id;
     // pass id as URL segment
     this.router.navigate(['edit-client', id]);
@@ -117,7 +125,10 @@ createClient(): void {
     paymentToClient(): void {
     if (!this.gridApi) { return; }
     const selectedNodes = this.gridApi.getSelectedNodes();
-    if (!selectedNodes || selectedNodes.length === 0) { return; }
+    if (!selectedNodes || selectedNodes.length === 0) { 
+      this.router.navigate(['payment']);
+      return; 
+    }
     const id = selectedNodes[0].data._id;
     //pass id as URL segment
     if(id) {
@@ -201,6 +212,12 @@ createClient(): void {
     
 
     doc.save(filteredRowData[0].Name + '_bills.pdf');
+  }
+  onQuickFilterChanged(event: any) {
+    const filterValue = event.target.value;
+    if (this.gridApi) {
+      this.gridApi.setQuickFilter(filterValue);
+    }
   }
 //   clickMethod(name: string):void {
 //   if(window.confirm("Are you sure you want to delete " + name + "?")) {

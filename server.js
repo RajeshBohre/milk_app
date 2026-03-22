@@ -8,8 +8,8 @@ var bodyParser = require('body-parser');
 var mongo = require("mongoose");
 const { type } = require('os');
 mongo.set('debug', true);
+//const DB = "mongodb://localhost:27017/milkhisab"
 const DB = "mongodb+srv://rajeshkh76:rajesh@cluster0.2e8kjso.mongodb.net/milkhisab?retryWrites=true&w=majority"
-//const DB = "mongodb+srv://rajeshkh76:rajesh@cluster0.2e8kjso.mongodb.net/medicalbill?retryWrites=true&w=majority"
 // var db = mongo.connect(DB, function (err, response) {
 //     if (err) { console.log(err); }
 //     else { console.log('Connected to ' + db, ' + ', response); }
@@ -118,6 +118,7 @@ var paymentSchema = new Schema({
     
     amount: { type: String, required: true },
     paymentDate: { type: Date, required: true },
+    id: { type: String, required: true }
     
 }, { versionKey: false });
 app.post("/api/paymentEntry", function (req, res) {
@@ -136,6 +137,16 @@ const currPaymentModel = mongo.model(req.body.userName + '_payment_db', paymentS
 app.get("/api/getEntry/:userName", function (req, res) {
     const currEntryModel = mongo.model(req.params.userName + 'db', entrySchema, req.params.userName + 'db');
     currEntryModel.find({}, function (err, data) {
+        if (err) {
+            res.send(err);
+        } else {
+            res.send(data);
+        }
+    });
+});
+app.get("/api/getPaymentEntry/:userName", function (req, res) {
+    const currPaymentModel = mongo.model(req.params.userName + '_payment_db', paymentSchema, req.params.userName + '_payment_db');
+    currPaymentModel.find({}, function (err, data) {
         if (err) {
             res.send(err);
         } else {

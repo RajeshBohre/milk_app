@@ -15,6 +15,9 @@ export class PaymentComponent {
 Name: string = '';
 amount: string = '';
 paymentDate: Date = new Date();
+startDate: Date = new Date();
+endDate: Date = new Date();
+isMultiplePayments: boolean = false;
 private routeSub: Subscription = new Subscription();
 userName: String = '';
 mainData: any;
@@ -27,13 +30,18 @@ ngOnInit(): void {
          // fallback to navigation state (if you used router.navigate(['/bill'], { state: { id } }))
          if (!id && history && (history.state && (history.state as any).id)) {
            id = (history.state as any).id;
+           this.isMultiplePayments = true; // If id is from state, we assume it's for multiple payments (this is just an example, adjust logic as needed)
          }
          if (id) {
         console.log('Loaded id:', id);
+        this.isMultiplePayments = false;
         //this.id = id;
         this.getBills(id);
         // TODO: call service to load bill by id and populate fields:
         // this.commonService.getBillById(id).subscribe(b => { this.patientName = b.patientName; ... });
+      } else {
+        this.isMultiplePayments = true;
+        this.getBills('`'); // Load all bills for the user to process multiple payments
       }
         })
   }
@@ -63,17 +71,70 @@ onSubmit() {
   console.log('Payment submitted:', { Name: this.Name, amount: this.amount, paymentDate: this.paymentDate });
   alert('Payment submitted successfully!');
   const req = {
-    Name: this.Name, amount: this.amount, paymentDate: this.paymentDate , userName: this.userName,
+    Name: this.Name, amount: this.amount, 
+    paymentDate: this.paymentDate , 
+    userName: this.userName,
+    id: this.route.snapshot.paramMap.get('id') || (history && (history.state && (history.state as any).id)) || ''
+  }
+  if(this.isMultiplePayments) {
+    req.id = ''; // Clear id for multiple payments, adjust logic as needed
   }
   this.commonService.paymentEntry(req).subscribe({
       next: (response) => {
         //this.displayModal = true;
         console.log('Bill created successfully:', response);
+        if(this.isMultiplePayments) {
+          this.updateMultiplePayments();
+        } else {
+           this.updatePayment();
+        }
       },
       error: (error) => {
         console.error('Error creating bill:', error);
       }
     });
+}
+updatePayment() {
+  let updatedBill = {};
+  const id = this.route.snapshot.paramMap.get('id') || (history && (history.state && (history.state as any).id)) || '';
+  this.mainData.forEach((b: any) => {
+    if (b._id === id) {
+      b.paymentStatus = 'paid';
+      b.userName = this.userName;
+      updatedBill = b;
+    }
+  });
+   
+   this.commonService.updateEntry(updatedBill).subscribe({
+      next: (response) => {
+        console.log('Bill updated successfully:', response);
+      },
+      error: (error) => {
+        console.error('Error updating bill:', error);
+      }
+    });
+}
+updateMultiplePayments() {
+  const updatedBills = this.mainData.map((b: any) => {
+    if (b.paymentStatus !== 'paid') {
+      return { ...b, paymentStatus: 'paid', userName: this.userName };
+    }
+    return b;
+  });
+  // Call updateEntry for each bill (you may want to optimize this by creating a batch update endpoint in your backend)
+  updatedBills.forEach((bill: any) => {
+    bill.billDate = bill.billDate.toString().split('T')[0];
+    if (bill.name === this.Name && bill._id && new Date(this.startDate) <= new Date(bill.billDate) && new Date(bill.billDate) <= new Date(this.endDate)) {
+      this.commonService.updateEntry(bill).subscribe({
+        next: (response) => {
+          console.log('Bill updated successfully:', response);
+        },
+        error: (error) => {
+          console.error('Error updating bill:', error);
+        }
+      });
+    }
+  });
 }
 backToList(): void {
 
