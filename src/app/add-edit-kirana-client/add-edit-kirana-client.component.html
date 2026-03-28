@@ -1,0 +1,46 @@
+
+
+<div class="bill-form-wrapper">
+    <div class="form-header">Entry Form</div>
+
+    <form>
+        <div class="form-row">
+            <label for="Name">Name</label>
+            <input id="Name" name="Name" [(ngModel)]="Name" type="text" placeholder="Enter name" required />
+        </div>
+       
+        
+        <div class="form-row">
+            <label for="Amount">Amount</label>
+            <input id="Amount" name="Amount" [(ngModel)]="Amount" type="number" step="0.01" min="0" placeholder="0.00" required />
+        </div>
+
+        <div class="form-row">
+            <label for="billDate">Bill Date</label>
+            <input id="billDate" name="billDate" [(ngModel)]="billDate" type="date" required />
+        </div>
+        <div class="form-row">
+            <label for="paymentStatus">Payment Status</label>
+            <select id="paymentStatus" name="paymentStatus" [(ngModel)]="paymentStatus" required>
+                <option value="" disabled selected>Select payment status</option>
+                <option value="Paid">Paid</option>
+                <option value="Unpaid">Unpaid</option>
+            </select>
+        </div>
+        <div class="form-row">
+            <label for="comment">Comment</label>
+            <textarea id="comment" name="comment" [(ngModel)]="comment" placeholder="Enter any comments" rows="4"></textarea>
+        </div>
+
+        <div class="actions">
+            <button type="submit" (click)="onSubmit()">Save</button>
+             <button style="margin-left: 10px;" type="submit" (click)="backToList()">Back</button>
+        </div>
+       
+    </form>
+</div>
+<!-- <p-dialog header="Header" [modal]="true" [(visible)]="displayModal" [style]="{width: '50vw'}">
+    <p>
+        Data saved successfully.
+    </p>
+</p-dialog> -->

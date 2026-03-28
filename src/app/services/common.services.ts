@@ -7,8 +7,8 @@ import { catchError } from 'rxjs/operators';
 })
 export class CommonService {
     // baseUrl should point to your backend (set in environment.ts)
-    //private baseUrl: string = 'http://localhost:8084/api';
-    private baseUrl: string = 'https://milk-app-i64g.onrender.com/api';
+    private baseUrl: string = 'http://localhost:8084/api';
+    //private baseUrl: string = 'https://milk-app-i64g.onrender.com/api';
 
     constructor(private http: HttpClient) {}
     userRegister(req: any): Observable<any> {
@@ -47,6 +47,24 @@ export class CommonService {
             catchError(this.handleError)
         );
     }
+    createKiranaEntry(req: any): Observable<any> {
+        const url = `${this.baseUrl}/insertKiranaEntry`; // adjust route to match your backend
+        //const body = { id, update };
+        const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+
+        return this.http.post<any>(url, req, { headers }).pipe(
+            catchError(this.handleError)
+        );
+    }
+    updateKiranaEntry(req: any): Observable<any> {
+        const url = `${this.baseUrl}/updateKiranaEntry`; // adjust route to match your backend
+        //const body = { id, update };
+        const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+
+        return this.http.patch<any>(url, req, { headers }).pipe(
+            catchError(this.handleError)
+        );
+    }
     deleteEntry(id: string, userName: string): Observable<any> {
         const url = `${this.baseUrl}/entryDelete/${id}`; // adjust route to match your backend
         const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
@@ -70,6 +88,12 @@ export class CommonService {
     }
     getDetailsMilkMan(req: any): Observable<any> {
         const url = `${this.baseUrl}/getEntry/${req.userName}`; // adjust route to match your backend
+        return this.http.get<any>(url).pipe(
+            catchError(this.handleError)
+        );
+    }
+    getDetailsKirana(req: any): Observable<any> {
+        const url = `${this.baseUrl}/getKiranaEntry/${req.userName}`; // adjust route to match your backend
         return this.http.get<any>(url).pipe(
             catchError(this.handleError)
         );

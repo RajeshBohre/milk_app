@@ -18,6 +18,8 @@ export class RegistrationComponent {
   address: String = '';
   password: String = '';
   userName: String = '';
+  businessType: String = '';
+
   constructor(private commonService: CommonService) {}
 
   onRegister() {
@@ -27,6 +29,7 @@ export class RegistrationComponent {
       lastName: this.lastName,
       mobileNumber: this.mobileNumber,
       address: this.address,
+      businessType: this.businessType,
       password: this.password,
       userName: tempUsername
     };

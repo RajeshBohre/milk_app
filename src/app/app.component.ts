@@ -6,6 +6,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { FormGroup } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { CommonService } from './services/common.services';
 
 @Component({
   selector: 'app-root',
@@ -25,9 +26,9 @@ export class AppComponent {
   userName: any;
   password: any;
   isRegistration: boolean = false;
-  constructor(private router: Router) {}
+  constructor(private router: Router, private commonService: CommonService) {}
   ngOnInit(): void {
-      
-    }
-    
+    this.userName = this.commonService.getLoggedInUser()?.name || '';
+  }
+
 }

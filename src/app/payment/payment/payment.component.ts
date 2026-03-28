@@ -47,7 +47,28 @@ ngOnInit(): void {
   }
    getBills(id: string): void {
     const req = { userName: this.userName };
-    this.commonService.getDetailsMilkMan(req).subscribe({
+    if(this.commonService.getLoggedInUser()?.businessType === 'Kirana') {
+      this.commonService.getDetailsKirana(req).subscribe({
+      next: (data) => {
+       this.mainData = data;
+       this.mainData.forEach((b: any) => {
+          if (b._id === id) {
+            this.Name = b.Name;
+            
+            this.amount = b.Amount;
+            this.paymentDate = b.billDate;
+            
+          }
+        });
+      },
+      
+      error: (err) => {
+        //this.error = this.(err);
+
+      }
+    });
+    } else if(this.commonService.getLoggedInUser()?.businessType === 'Milk') {
+      this.commonService.getDetailsMilkMan(req).subscribe({
       next: (data) => {
        this.mainData = data;
        this.mainData.forEach((b: any) => {
@@ -65,14 +86,18 @@ ngOnInit(): void {
         
       }
     });
+    } else {
+      
+    }
+    
   }
 onSubmit() {
   // Implement payment submission logic here, e.g., call a service to save payment details
   console.log('Payment submitted:', { Name: this.Name, amount: this.amount, paymentDate: this.paymentDate });
   alert('Payment submitted successfully!');
   const req = {
-    Name: this.Name, amount: this.amount, 
-    paymentDate: this.paymentDate , 
+    Name: this.Name, amount: this.amount,
+    paymentDate: this.paymentDate,
     userName: this.userName,
     id: this.route.snapshot.paramMap.get('id') || (history && (history.state && (history.state as any).id)) || ''
   }
@@ -117,14 +142,15 @@ updatePayment() {
 updateMultiplePayments() {
   const updatedBills = this.mainData.map((b: any) => {
     if (b.paymentStatus !== 'paid') {
-      return { ...b, paymentStatus: 'paid', userName: this.userName };
+      return { ...b, userName: this.userName };
     }
     return b;
   });
   // Call updateEntry for each bill (you may want to optimize this by creating a batch update endpoint in your backend)
   updatedBills.forEach((bill: any) => {
     bill.billDate = bill.billDate.toString().split('T')[0];
-    if (bill.name === this.Name && bill._id && new Date(this.startDate) <= new Date(bill.billDate) && new Date(bill.billDate) <= new Date(this.endDate)) {
+    if (bill.Name === this.Name && bill.paymentStatus !== 'paid' && bill._id && new Date(this.startDate) <= new Date(bill.billDate) && new Date(bill.billDate) <= new Date(this.endDate)) {
+      bill.paymentStatus = 'paid';
       this.commonService.updateEntry(bill).subscribe({
         next: (response) => {
           console.log('Bill updated successfully:', response);

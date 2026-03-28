@@ -44,7 +44,7 @@ export class LoginPageComponent {
     this.userList.forEach((user) => {
       if (user.userName === this.userName && user.password === this.password) {
         this.isValidated = true;
-        this.commonService.setLoggedInUser({ name: user.firstName + " " + user.lastName , userName: user.userName }); // Store logged-in user info
+        this.commonService.setLoggedInUser({ name: user.firstName + " " + user.lastName , userName: user.userName, businessType: user.businessType }); // Store logged-in user info
         this.router.navigate(['home']);
       }
     });
@@ -55,8 +55,13 @@ export class LoginPageComponent {
         } else {
           // Handle successful login
           alert('Login successful!');
-          
-          this.router.navigate(['client-details']);
+          if (this.commonService.getLoggedInUser().businessType === 'Milk') {
+            this.router.navigate(['client-details']);
+          } else if (this.commonService.getLoggedInUser().businessType === 'Kirana') {
+            this.router.navigate(['kirana-client-details']);
+          } else {
+            this.router.navigate(['home']);
+          }
         }
     }
     onRegister() {

@@ -6,7 +6,33 @@ var cors = require('cors')
 var bodyParser = require('body-parser');
 //var studentModel = require('./student-model');
 var mongo = require("mongoose");
+const axios = require("axios");
+//const fast2sms = require('fast2sms');
+
 const { type } = require('os');
+const options = {
+    // Find your API key in the Fast2SMS Dev API section
+    API_KEY: 'aQFLm94GnDbCPNX3KlT61rpWt2BVkwAZMSIERq8iHOyU7gjocJsYFUj30Ro6SngcXr9DQHKihtuJTq7b',
+
+    // Optional settings can be added here (e.g., sender_id, language, route)
+    // sender_id: 'FSTSMS', 
+    // language: 'english',
+    // route: 'qt' // Quick transactional route
+};
+// fast2sms.init(options);
+// const messageDetails = {
+//     message: 'test message from my app', // The SMS content
+//     to: '9970807617' // Target phone number(s) as a string (comma-separated for multiple)
+// };
+// fast2sms.send(messageDetails)
+//     .then(function (data) {
+//         console.log('SMS sent successfully:', data);
+//         // Data contains the success response from the API
+//     })
+//     .catch(function (error) {
+//         console.error('Error sending SMS:', error);
+//         // Handle any errors that occur during the API call
+//     });
 mongo.set('debug', true);
 //const DB = "mongodb://localhost:27017/milkhisab"
 const DB = "mongodb+srv://rajeshkh76:rajesh@cluster0.2e8kjso.mongodb.net/milkhisab?retryWrites=true&w=majority"
@@ -53,6 +79,7 @@ var userSchema = new Schema({
     lastName: { type: String, required: true },
     mobileNumber: { type: String, required: true },
     address: { type: String, required: true },
+    businessType: { type: String, required: true },
     password: { type: String, required: true },
     userName: { type: String, required: true }
 }, { versionKey: false });
@@ -113,6 +140,26 @@ const currEntryModel = mongo.model(req.body.userName + 'db', entrySchema, req.bo
         });
     }
 });
+var entryKiranaSchema = new Schema({
+    Name: { type: String, required: true },
+    Amount: { type: String, required: true },
+    billDate: { type: Date, required: true },
+    comment: { type: String, required: false },
+    paymentStatus: {type: String, required: true}
+}, { versionKey: false });
+app.post("/api/insertKiranaEntry", function (req, res) {
+const kiranaEntryModel = mongo.model(req.body.userName + 'db', entryKiranaSchema, req.body.userName + 'db');
+    var mod = new kiranaEntryModel(req.body);
+    if (req.body) {
+        mod.save(function (err, data) {
+            if (err) {
+                res.send(err);
+            } else {
+                res.send({ data: "Record has been Inserted..!!" });
+            }
+        });
+    }
+});
 var paymentSchema = new Schema({
     Name: { type: String, required: true },
     
@@ -137,6 +184,16 @@ const currPaymentModel = mongo.model(req.body.userName + '_payment_db', paymentS
 app.get("/api/getEntry/:userName", function (req, res) {
     const currEntryModel = mongo.model(req.params.userName + 'db', entrySchema, req.params.userName + 'db');
     currEntryModel.find({}, function (err, data) {
+        if (err) {
+            res.send(err);
+        } else {
+            res.send(data);
+        }
+    });
+});
+app.get("/api/getKiranaEntry/:userName", function (req, res) {
+    const currKiranaEntryModel = mongo.model(req.params.userName + 'db', entryKiranaSchema, req.params.userName + 'db');
+    currKiranaEntryModel.find({}, function (err, data) {
         if (err) {
             res.send(err);
         } else {
@@ -175,11 +232,27 @@ app.patch("/api/updateEntry", function (req, res) {
         return res.send({ message: "Record has been Updated..!!", updated: data });
     });
 });
-
-// const deleteManyBills = async (invoiceNumber) => {
-//     try {
-//         const result = await billModel.deleteMany({ "invoiceNumber": '23385' });
-//         return result;
+app.patch("/api/updateKiranaEntry", function (req, res) {
+    const currKiranaEntryModel = mongo.model(req.body.userName + 'db', entryKiranaSchema, req.body.userName + 'db');
+    const id = req.body._id || req.params._id;
+    if (!id) {
+        return res.status(400).send({ error: "Missing id" });
+    }
+    // prepare update object (avoid changing _id)
+    const update = Object.assign({}, req.body);
+    delete update._id;
+    delete update.id;
+    
+    currKiranaEntryModel.findByIdAndUpdate(id, update, { new: true, runValidators: true }, function (err, data) {
+        if (err) {
+            return res.status(500).send(err);
+        }
+        if (!data) {
+            return res.status(404).send({ error: "Record not found" });
+        }
+        return res.send({ message: "Record has been Updated..!!", updated: data });
+    });
+});
 //     } catch (error) {
 //         throw error;
 //     }
@@ -232,6 +305,7 @@ app.patch("/api/updateBacklog",function(req,res){
     res.send({data:"Record has been Updated..!!"});
     }});
 })
+
 var port = process.env.PORT || 8084;
 app.listen(port, function () {
     console.log('Example app listening on port 8084!')

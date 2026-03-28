@@ -16,11 +16,11 @@ import { AgGridAngular, AgGridModule } from 'ag-grid-angular';
 @Component({
   standalone: true,
   imports: [AgGridModule, CommonModule, FormsModule ],
-  selector: 'app-client-details',
-  templateUrl: './client-details.component.html',
-  styleUrls: ['./client-details.component.scss']
+  selector: 'app-kirana-client-details',
+  templateUrl: './kirana-client.component.html',
+  styleUrls: ['./kirana-client.component.scss']
 })
-export class ClientDetailsComponent implements OnInit {
+export class KiranaClientDetailsComponent implements OnInit {
   // variables
   loggedInUser: any = null; // Store logged-in user info
   rowData: any[] = [];
@@ -45,16 +45,12 @@ export class ClientDetailsComponent implements OnInit {
       filter: false,
       resizable: true
     },
-    { headerName: 'Name', field: 'Name', minWidth: 100 },
-    { headerName: 'Quantity', field: 'quantity', minWidth: 60,maxWidth: 120, },
-    { headerName: 'Fat Content', field: 'fatContent', minWidth: 60,maxWidth: 100, },
-    { headerName: 'Milk Type', field: 'milkType', minWidth: 100 ,maxWidth: 100,},
-    { headerName: 'Rate', field: 'rate', minWidth: 60 ,maxWidth: 100,},
-    { headerName: 'CLR', field: 'clr', minWidth: 60 ,maxWidth: 80,},
-    { headerName: 'SNF', field: 'snf', minWidth: 60 ,maxWidth: 80,},
-    { headerName: 'Amount', field: 'Amount', minWidth: 150 ,maxWidth: 120,},
+    { headerName: 'Customer Name', field: 'Name', minWidth: 100 },
+    { headerName: 'Amount', field: 'Amount', minWidth: 60,maxWidth: 120, },
+    
+    { headerName: 'Date', field: 'billDate', minWidth: 200 },
     { headerName: 'Payment Status', field: 'paymentStatus', minWidth: 150 },
-    { headerName: 'Bill Date', field: 'billDate', minWidth: 200 }
+    { headerName: 'Comment', field: 'comment', minWidth: 350 },
 
   ];
   loading = false;
@@ -62,6 +58,7 @@ export class ClientDetailsComponent implements OnInit {
 
   // store grid API when grid is ready
   gridApi: GridApi | null = null;
+  receivedPayment: number = 0;
 
   onGridReady(params: GridReadyEvent): void {
     this.gridApi = params.api;
@@ -74,13 +71,26 @@ export class ClientDetailsComponent implements OnInit {
     //this.all();
     this.loggedInUser = this.commonService.getLoggedInUser(); // Get logged-in user info (if needed for display)
     this.getPatients();
+    this.receivedPaymentAmount();
   }
-  
+  receivedPaymentAmount() {
+    this.commonService.getPaymentDetails(this.loggedInUser).subscribe({
+      next: (data) => {
+        data.forEach((payment: any) => {
+          if (payment.paymentStatus !== 'paid') {
+            this.receivedPayment += Number(payment.amount) || 0;
+          }
+        });
+        //this.receivedPayment = data?.amount || 0;
+      }
+    });
+    
+  }
   getPatients(): void {
     this.loading = true;
     this.error = null;
     
-    this.commonService.getDetailsMilkMan(this.loggedInUser).subscribe({
+    this.commonService.getDetailsKirana(this.loggedInUser).subscribe({
       next: (data) => {
         const formatDate = (val: any): string => {
           if (val == null) return '';
@@ -107,7 +117,7 @@ export class ClientDetailsComponent implements OnInit {
     });
   }
 createClient(): void {
-  this.router.navigate(['add-client']);
+  this.router.navigate(['add-kirana-client']);
     // Implement client creation logic here, e.g., navigate to a form for creating a new client.
   }
   editClient(): void {
@@ -118,13 +128,13 @@ createClient(): void {
       return;
     }
     if (!selectedNodes || selectedNodes.length === 0) { 
-      this.router.navigate(['add-client']);
+      this.router.navigate(['edit-kirana-client']);
       return; 
     }
     
     const id = selectedNodes[0].data._id;
     // pass id as URL segment
-    this.router.navigate(['edit-client', id]);
+    this.router.navigate(['edit-kirana-client', id]);
     // Implement client editing logic here, e.g., open a form pre-filled with client data.
   }
     paymentToClient(): void {
@@ -173,7 +183,7 @@ createClient(): void {
     const doc = new jsPDF();
     // add title and today's date at the top of the PDF
     doc.setFontSize(18);
-    doc.text('Milk Bill', 14, 22);
+    doc.text('Kirana Bill', 14, 22);
     // avoid calling setFont with style to prevent TypeScript issues with typings;
     // emulate a subtitle by increasing font size slightly
     doc.setFontSize(12);
@@ -218,11 +228,14 @@ createClient(): void {
 
     doc.save(filteredRowData[0].Name + '_bills.pdf');
   }
+  tempData: any[] = [];
   onQuickFilterChanged(event: any) {
     const filterValue = event.target.value;
     if (this.gridApi) {
       this.gridApi.setQuickFilter(filterValue);
+      this.tempData = this.rowData.filter(item => item.Name.toLowerCase().includes(filterValue.toLowerCase()));
     }
+    this.pendingAmount = this.tempData.reduce((sum, item) => sum + (item.paymentStatus !== 'paid' ? Number(item.Amount) || 0 : 0), 0);
   }
 //   clickMethod(name: string):void {
 //   if(window.confirm("Are you sure you want to delete " + name + "?")) {
