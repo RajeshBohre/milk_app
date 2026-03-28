@@ -6,7 +6,7 @@ var cors = require('cors')
 var bodyParser = require('body-parser');
 //var studentModel = require('./student-model');
 var mongo = require("mongoose");
-const axios = require("axios");
+//const axios = require("axios");
 //const fast2sms = require('fast2sms');
 
 const { type } = require('os');

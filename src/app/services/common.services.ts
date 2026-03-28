@@ -7,8 +7,8 @@ import { catchError } from 'rxjs/operators';
 })
 export class CommonService {
     // baseUrl should point to your backend (set in environment.ts)
-    private baseUrl: string = 'http://localhost:8084/api';
-    //private baseUrl: string = 'https://milk-app-i64g.onrender.com/api';
+    //private baseUrl: string = 'http://localhost:8084/api';
+    private baseUrl: string = 'https://milk-app-i64g.onrender.com/api';
 
     constructor(private http: HttpClient) {}
     userRegister(req: any): Observable<any> {
