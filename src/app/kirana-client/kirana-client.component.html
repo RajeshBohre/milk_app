@@ -1,20 +1,27 @@
 
 <!-- File: client-details.component.html -->
- <span >
-    <span style="text-align: center;">Total Udhari : {{ pendingAmount }}</span>
-        <span style="text-align: center;"> Total Payment Recieved : {{ receivedPayment }}</span>
- </span>
-<div class="toolbar" style="margin-top:5px; margin-left:10px; display:flex; gap:8px; align-items:center;">
+ <span  style="margin-left: 10px;">
+    <span class="btn btn-light btn-lg mt-3 tiles" >Total Udhari : {{ pendingAmount }}</span>
+    <span style="margin-left: 5px;" class="btn btn-light btn-lg mt-3 tiles"> Today Udhari : {{ TodayUdhari }}</span>
+    <span style="margin-left: 5px;" class="btn btn-light btn-lg mt-3 tiles"> Total Payment Recieved : {{ receivedPayment }}</span>
+    <span style="margin-left: 5px;" class="btn btn-light btn-lg mt-3 tiles"> Today Payment Recieved : {{ TodayPaymentReceived }}</span>
+    <span style="margin-left: 5px;" class="btn btn-light btn-lg mt-3 tiles">  Pending Payment : {{ pendingAmount - receivedPayment}}</span>
+  </span>
+    <div class="toolbar" style="margin-top:5px; margin-left:10px; display:flex; gap:8px; align-items:center;">
     <button class="btn btn-success" type="button" (click)="createClient()">Create</button>
     <button class="btn btn-primary" type="button" (click)="editClient()" [disabled]="false">Edit</button>
     <button class="btn btn-danger" type="button" (click)="deleteEntry()" [disabled]="false">Delete</button>
+    <!-- <button class="btn"><i class="fa fa-trash" (click)="deleteEntry()"></i></button> -->
     <!-- <button type="button" class="btn btn-danger" (click)="deleteEntry()" aria-label="Delete">
         <i class="fas fa-trash"></i>
     </button> -->
     <button class="btn btn-primary" type="button" (click)="paymentToClient()" [disabled]="false">Payment</button>
     <button class="btn btn-danger" type="button" (click)="downloadPdf()" [disabled]="false"> PDF</button>
-<input type="text" placeholder="Search..." (input)="onQuickFilterChanged($event)" style="padding: 5px; border: 1px solid #ccc; border-radius: 4px;">
+<!-- <input type="text" placeholder="Search..." (input)="onQuickFilterChanged($event)" style="padding: 5px; border: 1px solid #ccc; border-radius: 4px;"> -->
+
 </div>
+<input type="text" placeholder="Search..." (input)="onQuickFilterChanged($event)" style="margin-left: 10px; margin-top: 5px; padding: 5px; border: 1px solid #1d1818; border-radius: 4px;">
+
 <div class="client-details" style="margin-top: 5px;">
     <!-- Toolbar: quick filter, actions -->
     

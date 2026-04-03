@@ -26,9 +26,18 @@ export class AppComponent {
   userName: any;
   password: any;
   isRegistration: boolean = false;
+  islogin: boolean = false;
   constructor(private router: Router, private commonService: CommonService) {}
   ngOnInit(): void {
     this.userName = this.commonService.getLoggedInUser()?.name || '';
   }
-
+  onLogin() {
+    this.islogin = true;
+    this.router.navigate(['login']);
+    if (this.commonService.getLoggedInUser()) {
+      this.router.navigate(['home']);
+    } else {
+      this.router.navigate(['login']);
+    }
+  }
 }

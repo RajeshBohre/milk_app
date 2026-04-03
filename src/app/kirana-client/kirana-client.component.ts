@@ -10,6 +10,7 @@ import autoTable from 'jspdf-autotable';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AgGridAngular, AgGridModule } from 'ag-grid-angular';
+import { set } from 'mongoose';
 // Simple Client model — extend with real fields as needed
 
 
@@ -30,6 +31,7 @@ export class KiranaClientDetailsComponent implements OnInit {
     resizable: true,
   };
   pendingAmount: number = 0;
+  pendingPayment: number = 0;
   paidAmount: number = 0;
   totalCollection: number = 0;
   columnDefs: ColDef[] = [
@@ -59,7 +61,9 @@ export class KiranaClientDetailsComponent implements OnInit {
   // store grid API when grid is ready
   gridApi: GridApi | null = null;
   receivedPayment: number = 0;
-
+  paymentData: any[] = [];
+  TodayUdhari: number = 0;
+  TodayPaymentReceived: number = 0;
   onGridReady(params: GridReadyEvent): void {
     this.gridApi = params.api;
   }
@@ -72,17 +76,30 @@ export class KiranaClientDetailsComponent implements OnInit {
     this.loggedInUser = this.commonService.getLoggedInUser(); // Get logged-in user info (if needed for display)
     this.getPatients();
     this.receivedPaymentAmount();
+   
   }
   receivedPaymentAmount() {
     this.commonService.getPaymentDetails(this.loggedInUser).subscribe({
       next: (data) => {
+        this.paymentData = data;
+        this.TodayPaymentReceived = Array.isArray(data) ? data.reduce((sum, item) => {
+          const today = new Date();
+          const itemDate = new Date(item.paymentDate);
+          const isToday = itemDate.getDate() === today.getDate() &&
+                          itemDate.getMonth() === today.getMonth() &&
+                          itemDate.getFullYear() === today.getFullYear();
+          return sum + (isToday ? Number(item.amount) || 0 : 0);
+        }, 0) : 0;
         data.forEach((payment: any) => {
           if (payment.paymentStatus !== 'paid') {
             this.receivedPayment += Number(payment.amount) || 0;
+            //this.TodayPaymentReceived += Number(payment.amount) || 0;
           }
         });
         //this.receivedPayment = data?.amount || 0;
+        
       }
+      
     });
     
   }
@@ -92,6 +109,15 @@ export class KiranaClientDetailsComponent implements OnInit {
     
     this.commonService.getDetailsKirana(this.loggedInUser).subscribe({
       next: (data) => {
+        this.TodayUdhari = Array.isArray(data) ? data.reduce((sum, item) => {
+          const today = new Date();
+          const itemDate = new Date(item.billDate);
+          const isToday = itemDate.getDate() === today.getDate() &&
+                          itemDate.getMonth() === today.getMonth() &&
+                          itemDate.getFullYear() === today.getFullYear();
+          return sum + (isToday && item.paymentStatus !== 'paid' ? Number(item.Amount) || 0 : 0);
+        }, 0) : 0;
+        
         const formatDate = (val: any): string => {
           if (val == null) return '';
           const d = new Date(val);
@@ -109,6 +135,8 @@ export class KiranaClientDetailsComponent implements OnInit {
         this.pendingAmount = this.rowData.reduce((sum, item) => sum + (item.paymentStatus !== 'paid' ? Number(item.Amount) || 0 : 0), 0); 
         this.paidAmount = this.rowData.reduce((sum, item) => sum + (item.paymentStatus === 'paid' ? Number(item.Amount) || 0 : 0), 0);
         this.totalCollection = this.rowData.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);
+        
+
       },
       error: (err) => {
         //this.error = this.(err);
@@ -162,7 +190,7 @@ createClient(): void {
     const id = selectedNodes[0].data._id;
     // pass id as URL segment
 
-    this.commonService.deleteEntry(id, this.loggedInUser?.userName || '').subscribe({
+    this.commonService.deleteKiranaEntry(id, this.loggedInUser?.userName || '').subscribe({
       next: () => {
         this.getPatients(); // Refresh the list after deletion
       },
@@ -231,11 +259,15 @@ createClient(): void {
   tempData: any[] = [];
   onQuickFilterChanged(event: any) {
     const filterValue = event.target.value;
+    let tempPaymentData: any[] = [];
     if (this.gridApi) {
       this.gridApi.setQuickFilter(filterValue);
       this.tempData = this.rowData.filter(item => item.Name.toLowerCase().includes(filterValue.toLowerCase()));
+      
     }
+    tempPaymentData = this.paymentData.filter(item => item.Name.toLowerCase().includes(filterValue.toLowerCase()));
     this.pendingAmount = this.tempData.reduce((sum, item) => sum + (item.paymentStatus !== 'paid' ? Number(item.Amount) || 0 : 0), 0);
+    this.receivedPayment = tempPaymentData.reduce((sum, item) => sum +  Number(item.amount), 0);
   }
 //   clickMethod(name: string):void {
 //   if(window.confirm("Are you sure you want to delete " + name + "?")) {

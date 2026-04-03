@@ -1,6 +1,135 @@
-<div class="app-header" style=" display: flex; justify-content: center;background-color: rgb(102, 169, 233); padding: 10px;">
+<!-- <div class="app-header" style=" display: flex; justify-content: center;background-color: rgb(102, 169, 233); padding: 10px;">
     <span >Welcome {{ userName }}</span> <span style="font-weight: bold; text-align: end;"></span>
 
     
-  </div>
-<router-outlet></router-outlet>
+  </div> -->
+  <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ApnaHisab - Smart Business Accounting App</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://jsdelivr.net" rel="stylesheet">
+    <style>
+        .hero-section {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            padding: 100px 0;
+        }
+        .feature-icon {
+            font-size: 2rem;
+            color: #2575fc;
+        }
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+        .btn-custom {
+            background-color: #ff9f43;
+            color: white;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">Apna<span style="color:#ff9f43">Hisab</span></a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+                <a class="btn btn-custom btn-sm" (click)="onLogin()">Login</a>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="#features">Features</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#benefits">Benefits</a></li>
+                    <li class="nav-item"><a class="btn btn-custom btn-sm" (click)="onLogin()">Login</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header *ngIf="!islogin" class="hero-section text-center">
+        <div class="container">
+            <h1>Turn Retail Chaos into Clarity</h1>
+            <p class="lead">The All-in-One Accounting, Billing, and Inventory App for Modern Businesses.</p>
+            <a  class="btn btn-light btn-lg mt-3" (click)="onLogin()">Get Started for Free</a>
+        </div>
+    </header>
+
+    <!-- Features Section -->
+    <section *ngIf="!islogin" id="features" class="py-5">
+        <div class="container">
+            <h2 class="text-center mb-5">Powerful Features</h2>
+            <div class="row g-4">
+                <div class="col-md-4 text-center">
+                    <div class="p-4 border rounded shadow-sm">
+                        <div class="feature-icon mb-3">⚡</div>
+                        <h5>Fast Billing</h5>
+                        <p>Create GST-compliant invoices and bills in seconds.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 text-center">
+                    <div class="p-4 border rounded shadow-sm">
+                        <div class="feature-icon mb-3">📦</div>
+                        <h5>Stock Management</h5>
+                        <p>Track real-time inventory and get low stock alerts.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 text-center">
+                    <div class="p-4 border rounded shadow-sm">
+                        <div class="feature-icon mb-3">📱</div>
+                        <h5>WhatsApp Reports</h5>
+                        <p>Send bills and payment reminders directly via WhatsApp.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Benefits Section -->
+    <section *ngIf="!islogin" id="benefits" class="py-5 bg-light">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h2>Manage Your Business Anywhere, Anytime</h2>
+                    <p>ApnaHisab helps retailers minimize errors, calculate net landing costs (NLC), and keep detailed records of sales and purchases.</p>
+                    <ul>
+                        <li>100% Safe and Secure</li>
+                        <li>Automated Data Backup</li>
+                        <li>Multi-User Access</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <img src="https://placeholder.com" class="img-fluid rounded" alt="App Dashboard">
+                </div>
+            </div>
+        </div>
+    </section>
+    <router-outlet *ngIf="islogin"></router-outlet>
+    <!-- Download Section -->
+    <section id="download" class="py-5 text-center">
+        <div class="container">
+            <h2>Download the App Now</h2>
+            <p class="lead">Join thousands of retailers streamlining their business.</p>
+            <a href="#" class="btn btn-dark btn-lg m-2">Google Play Store</a>
+            <a href="#" class="btn btn-dark btn-lg m-2">Apple App Store</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white text-center py-4">
+        <div class="container">
+            <p>&copy; 2026 ApnaHisab App. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://jsdelivr.net"></script>
+</body>
+</html>
+

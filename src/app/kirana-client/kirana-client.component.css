@@ -1,0 +1,17 @@
+.tiles {
+    background-color: #2c2222;
+    color: wheat;
+}
+.btn {
+  background-color: rgb(12, 13, 14); /* Blue background */
+  border: none; /* Remove borders */
+  color: white; /* White text */
+  padding: 12px 16px; /* Some padding */
+  font-size: 12px; /* Set a font size */
+  cursor: pointer; /* Mouse pointer on hover */
+}
+
+/* Darker background on mouse-over */
+.btn:hover {
+  background-color: rgb(12, 13, 14);
+}

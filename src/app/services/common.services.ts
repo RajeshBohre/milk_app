@@ -73,6 +73,14 @@ export class CommonService {
             catchError(this.handleError)
         );
     }
+    deleteKiranaEntry(id: string, userName: string): Observable<any> {
+        const url = `${this.baseUrl}/kiranaEntryDelete/${id}`; // adjust route to match your backend
+        const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+
+        return this.http.delete<any>(url, { headers, body: { userName } }).pipe(
+            catchError(this.handleError)
+        );
+    }
     paymentEntry(req:any): Observable<any> {
         const url = `${this.baseUrl}/paymentEntry`;
         const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
