@@ -12,7 +12,7 @@ var mongo = require("mongoose");
 const { type } = require('os');
 const options = {
     // Find your API key in the Fast2SMS Dev API section
-    API_KEY: 'aQFLm94GnDbCPNX3KlT61rpWt2BVkwAZMSIERq8iHOyU7gjocJsYFUj30Ro6SngcXr9DQHKihtuJTq7b',
+   // API_KEY: 'aQFLm94GnDbCPNX3KlT61rpWt2BVkwAZMSIERq8iHOyU7gjocJsYFUj30Ro6SngcXr9DQHKihtuJTq7b',
 
     // Optional settings can be added here (e.g., sender_id, language, route)
     // sender_id: 'FSTSMS', 
@@ -267,6 +267,24 @@ app.delete("/api/entryDelete/:id", function (req, res) {
     }
 
     currEntryModel.findByIdAndDelete(id, function (err, data) {
+        if (err) {
+            return res.status(500).send(err);
+        }
+        if (!data) {
+            return res.status(404).send({ error: "Record not found" });
+        }
+        return res.send({ message: "Record has been Deleted..!!", deleted: data });
+    });
+});
+app.delete("/api/kiranaEntryDelete/:id", function (req, res) {
+    const currKiranaEntryModel = mongo.model(req.body.userName + 'db', entryKiranaSchema, req.body.userName + 'db');
+    const id = req.params.id;
+    //billModel.deleteMany({"invoiceNumber": "23385"});
+    if (!id) {
+        return res.status(400).send({ error: "Missing id" });
+    }
+
+    currKiranaEntryModel.findByIdAndDelete(id, function (err, data) {
         if (err) {
             return res.status(500).send(err);
         }
