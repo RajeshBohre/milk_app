@@ -383,13 +383,7 @@ app.post("/api/insertInventory", function (req, res) {
     }
 
 });
-io.on('connection', (socket) => {
-  console.log('Client connected:', socket.id);
-  
-  socket.on('message', (data) => {
-    io.emit('message', data); // Broadcast to all clients
-  });
-});
+
 var port = process.env.PORT || 8084;
 server.listen(port, function () {
     console.log('Example app listening on port 8084!')
