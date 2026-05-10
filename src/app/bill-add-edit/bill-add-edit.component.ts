@@ -4,6 +4,7 @@ import { ActivatedRoute, ParamMap } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { CommonModule , DatePipe} from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ChatService } from '../services/io.socket.service';
 
 @Component({
   standalone: true,
@@ -30,10 +31,12 @@ export class BillAddEditComponent {
   snf: string = '';
   today: string = ''; // To store the formatted date string
   fatRatePerKg: number = 1000;
-  constructor(private commonService: CommonService, private route: ActivatedRoute) {}
+  messages: string[] = [];
+
+  constructor(private commonService: CommonService, private route: ActivatedRoute, private chatService: ChatService) {}
   ngOnInit(): void {
     const now = new Date();
-    
+    this.billDate = now;
     // Format the date to 'yyyy-MM-dd' for HTML date inputs
     const year = now.getFullYear();
     const month = (now.getMonth() + 1).toString().padStart(2, '0');
@@ -57,7 +60,10 @@ export class BillAddEditComponent {
         // this.commonService.getBillById(id).subscribe(b => { this.patientName = b.patientName; ... });
       }
     });
-    
+    this.chatService.getMessages().subscribe(msg => {
+      console.log('Received message:', msg);
+      this.messages.push(msg);
+    });
   }
   ngOnDestroy() {
     this.routeSub.unsubscribe(); // Prevents memory leaks

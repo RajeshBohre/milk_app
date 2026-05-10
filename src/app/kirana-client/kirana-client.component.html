@@ -1,6 +1,6 @@
 
 <!-- File: client-details.component.html -->
- <span  style="margin-left: 10px;">
+<span  style="margin-left: 10px;">
     <span class="btn btn-light btn-lg mt-3 tiles" >Total Udhari : {{ pendingAmount }}</span>
     <span style="margin-left: 5px;" class="btn btn-light btn-lg mt-3 tiles"> Today Udhari : {{ TodayUdhari }}</span>
     <span style="margin-left: 5px;" class="btn btn-light btn-lg mt-3 tiles"> Total Payment Recieved : {{ receivedPayment }}</span>
@@ -39,7 +39,12 @@
         rowSelection="multiple"
         [animateRows]="true"
         [rowMultiSelectWithClick]="true"
-        
     >
     </ag-grid-angular>
+
+    <!-- Totals Display -->
+    <div style="margin-top: 10px; display: flex; gap: 15px; padding: 10px; background-color: #f5f5f5; border-radius: 4px;">
+        <span class="btn btn-light btn-sm">Total Credit: {{ totalCredit }}</span>
+        <span class="btn btn-light btn-sm">Total Debit: {{ totalDebit }}</span>
+    </div>
 </div>

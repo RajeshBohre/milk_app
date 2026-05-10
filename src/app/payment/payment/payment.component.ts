@@ -1,170 +1,161 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { ActivatedRoute, ParamMap } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { CommonService } from '../../services/common.services';
+
+interface LedgerEntry {
+  date: string;
+  particulars: string;
+  billNo: string;
+  cashDr: number;
+  expensesCr: number;
+  balance: number;
+  userName: string;
+}
+
 @Component({
   selector: 'app-payment',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './payment.component.html',
-  styleUrl: './payment.component.css'
+  styleUrls: ['./payment.component.css']
 })
-export class PaymentComponent {
-Name: string = '';
-amount: string = '';
-paymentDate: Date = new Date();
-startDate: Date = new Date();
-endDate: Date = new Date();
-isMultiplePayments: boolean = false;
-private routeSub: Subscription = new Subscription();
-userName: String = '';
-mainData: any;
-constructor(private route: ActivatedRoute, private commonService: CommonService){}
-ngOnInit(): void {
-  this.userName = this.commonService.getLoggedInUser()?.userName || '';
-    this.routeSub = this.route.paramMap.subscribe((params: ParamMap) => {
-         // first try route param
-         let id = params.get('id');
-         // fallback to navigation state (if you used router.navigate(['/bill'], { state: { id } }))
-         if (!id && history && (history.state && (history.state as any).id)) {
-           id = (history.state as any).id;
-           this.isMultiplePayments = true; // If id is from state, we assume it's for multiple payments (this is just an example, adjust logic as needed)
-         }
-         if (id) {
-        console.log('Loaded id:', id);
-        this.isMultiplePayments = false;
-        //this.id = id;
-        this.getBills(id);
-        // TODO: call service to load bill by id and populate fields:
-        // this.commonService.getBillById(id).subscribe(b => { this.patientName = b.patientName; ... });
-      } else {
-        this.isMultiplePayments = true;
-        this.getBills('`'); // Load all bills for the user to process multiple payments
-      }
-        })
-  }
-   getBills(id: string): void {
-    const req = { userName: this.userName };
-    if(this.commonService.getLoggedInUser()?.businessType === 'Kirana') {
-      this.commonService.getDetailsKirana(req).subscribe({
-      next: (data) => {
-       this.mainData = data;
-       this.mainData.forEach((b: any) => {
-          if (b._id === id) {
-            this.Name = b.Name;
-            
-            this.amount = b.Amount;
-            this.paymentDate = b.billDate;
-            
-          }
-        });
-      },
-      
-      error: (err) => {
-        //this.error = this.(err);
+export class PaymentComponent implements OnInit, OnDestroy {
+  ledgerForm!: FormGroup;
+  ledgerEntries: LedgerEntry[] = [];
 
-      }
+  private valueSub?: Subscription;
+
+  constructor(
+    private fb: FormBuilder,
+    private route: ActivatedRoute,
+    private commonService: CommonService
+  ) {}
+
+  ngOnInit(): void {
+    this.ledgerForm = this.fb.group({
+      date: [this.today(), Validators.required],
+      particulars: ['', Validators.required],
+      billNo: [''],
+      cashDr: ['', [Validators.required, Validators.min(0)]],
+      expensesCr: ['', [Validators.required, Validators.min(0)]],
+      balance: [{ value: 0, disabled: true }]
     });
-    } else if(this.commonService.getLoggedInUser()?.businessType === 'Milk') {
-      this.commonService.getDetailsMilkMan(req).subscribe({
+    this.loadPaymentHistory();
+    // update computed balance whenever cash or expenses change
+    this.valueSub = this.ledgerForm.valueChanges.subscribe(() => {
+      const cash = Number(this.ledgerForm.get('cashDr')?.value) || 0;
+      const exp = Number(this.ledgerForm.get('expensesCr')?.value) || 0;
+      const lastBalance = this.ledgerEntries.length ? this.ledgerEntries[this.ledgerEntries.length - 1].balance : 0;
+      const balance = lastBalance + cash - exp;
+      this.ledgerForm.get('balance')?.setValue(balance, { emitEvent: false });
+    });
+  }
+  loadPaymentHistory(): void {
+    const req = { userName: this.commonService.getLoggedInUser().userName };
+    this.commonService.getPaymentHistory(req).subscribe({
       next: (data) => {
-       this.mainData = data;
-       this.mainData.forEach((b: any) => {
-          if (b._id === id) {
-            this.Name = b.Name;
-            
-            this.amount = b.Amount;
-            this.paymentDate = b.billDate;
-            
-          }
-        });
-      },
-      error: (err) => {
-        //this.error = this.(err);
-        
-      }
-    });
-    } else {
-      
-    }
-    
-  }
-onSubmit() {
-  // Implement payment submission logic here, e.g., call a service to save payment details
-  console.log('Payment submitted:', { Name: this.Name, amount: this.amount, paymentDate: this.paymentDate });
-  alert('Payment submitted successfully!');
-  const req = {
-    Name: this.Name, amount: this.amount,
-    paymentDate: this.paymentDate,
-    userName: this.userName,
-    id: this.route.snapshot.paramMap.get('id') || (history && (history.state && (history.state as any).id)) || ''
-  }
-  if(this.isMultiplePayments) {
-    req.id = ''; // Clear id for multiple payments, adjust logic as needed
-  }
-  this.commonService.paymentEntry(req).subscribe({
-      next: (response) => {
-        //this.displayModal = true;
-        console.log('Bill created successfully:', response);
-        if(this.isMultiplePayments) {
-          this.updateMultiplePayments();
-        } else {
-           this.updatePayment();
-        }
+        this.ledgerEntries = Array.isArray(data) ? data : [];
       },
       error: (error) => {
-        console.error('Error creating bill:', error);
+        console.error('Error loading payment history:', error);
       }
     });
-}
-updatePayment() {
-  let updatedBill = {};
-  const id = this.route.snapshot.paramMap.get('id') || (history && (history.state && (history.state as any).id)) || '';
-  this.mainData.forEach((b: any) => {
-    if (b._id === id) {
-      b.paymentStatus = 'paid';
-      b.userName = this.userName;
-      updatedBill = b;
-    }
-  });
-   
-   this.commonService.updateEntry(updatedBill).subscribe({
-      next: (response) => {
-        console.log('Bill updated successfully:', response);
-      },
-      error: (error) => {
-        console.error('Error updating bill:', error);
+  }
+  updateBalance(): void {
+    const cash = Number(this.ledgerForm.get('cashDr')?.value) || 0;
+    const exp = Number(this.ledgerForm.get('expensesCr')?.value) || 0;
+    const lastBalance = this.ledgerEntries.length ? this.ledgerEntries[this.ledgerEntries.length - 1].balance : 0;
+    const balance = Number(lastBalance) + Number(cash) - Number(exp);
+    this.ledgerForm.get('balance')?.setValue(balance, { emitEvent: false });
+  }
+  onSubmit(): void {
+    this.loadPaymentHistory();
+    this.valueSub = this.commonService.getPaymentHistory({ userName: this.commonService.getLoggedInUser().userName }).subscribe({
+      next: () => {
+      if (!this.ledgerForm || this.ledgerForm.invalid) return;
+      let lastBalance = 0;
+      if (this.ledgerEntries.length) {
+        lastBalance = this.ledgerEntries[this.ledgerEntries.length - 1].balance;
       }
-    });
-}
-updateMultiplePayments() {
-  const updatedBills = this.mainData.map((b: any) => {
-    if (b.paymentStatus !== 'paid') {
-      return { ...b, userName: this.userName };
-    }
-    return b;
-  });
-  // Call updateEntry for each bill (you may want to optimize this by creating a batch update endpoint in your backend)
-  updatedBills.forEach((bill: any) => {
-    bill.billDate = bill.billDate.toString().split('T')[0];
-    if (bill.Name === this.Name && bill.paymentStatus !== 'paid' && bill._id && new Date(this.startDate) <= new Date(bill.billDate) && new Date(bill.billDate) <= new Date(this.endDate)) {
-      bill.paymentStatus = 'paid';
-      this.commonService.updateEntry(bill).subscribe({
-        next: (response) => {
-          console.log('Bill updated successfully:', response);
+      const raw = this.ledgerForm.getRawValue();
+      const entry: LedgerEntry = {
+        date: raw.date,
+        particulars: raw.particulars,
+        billNo: raw.billNo,
+        cashDr: Number(raw.cashDr) || 0,
+        expensesCr: Number(raw.expensesCr) || 0,
+        balance: Number(lastBalance) + (Number(raw.cashDr) || 0) - (Number(raw.expensesCr) || 0) || 0,
+        userName: this.commonService.getLoggedInUser().userName
+      };
+      this.commonService.paymentEntry(entry).subscribe({
+        next: () => {
+        console.log('Payment entry saved successfully');
         },
-        error: (error) => {
-          console.error('Error updating bill:', error);
+        error: (err) => {
+        console.error('Error saving payment entry:', err);
         }
       });
+      this.ledgerForm.patchValue({
+        date: this.today(),
+        particulars: '',
+        billNo: '',
+        cashDr: 0,
+        expensesCr: 0,
+        balance: Number(entry.balance)
+      });
+      },
+      error: (error) => {
+      console.error('Error loading payment history:', error);
+      }
+    });
+    if (!this.ledgerForm || this.ledgerForm.invalid) return;
+    let lastBalance = 0;
+    if (this.ledgerEntries.length) {
+      lastBalance = this.ledgerEntries[this.ledgerEntries.length - 1].balance;
     }
-  });
-}
-backToList(): void {
+    const raw = this.ledgerForm.getRawValue();
+    const entry: LedgerEntry = {
+      date: raw.date,
+      particulars: raw.particulars,
+      billNo: raw.billNo,
+      cashDr: Number(raw.cashDr) || 0,
+      expensesCr: Number(raw.expensesCr) || 0,
+      balance: Number(lastBalance) + (Number(raw.cashDr) || 0) - (Number(raw.expensesCr) || 0) || 0,
+      userName: this.commonService.getLoggedInUser().userName
+    };
+    this.commonService.paymentEntry(entry).subscribe({
+      next: () => {
+        console.log('Payment entry saved successfully');
+      },
+      error: (err) => {
+        console.error('Error saving payment entry:', err);
+      }
+    });
 
-  // Navigate back to the client details list (you can use Angular Router for this)
-  window.history.back(); // simple way to go back, or use this.router.navigate(['/client-details']);  
-}
+    //this.ledgerEntries.push(entry);
+
+    // reset inputs but keep balance as starting point for next entry
+    this.ledgerForm.patchValue({
+      date: this.today(),
+      particulars: '',
+      billNo: '',
+      cashDr: 0,
+      expensesCr: 0,
+      balance: entry.balance
+    });
+  }
+
+  private today(): string {
+    const d = new Date();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${d.getFullYear()}-${mm}-${dd}`;
+  }
+
+  ngOnDestroy(): void {
+    this.valueSub?.unsubscribe();
+  }
 }

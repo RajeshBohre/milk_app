@@ -10,6 +10,7 @@ import autoTable from 'jspdf-autotable';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AgGridAngular, AgGridModule } from 'ag-grid-angular';
+import { ChatService } from '../services/io.socket.service';
 // Simple Client model — extend with real fields as needed
 
 
@@ -21,6 +22,7 @@ import { AgGridAngular, AgGridModule } from 'ag-grid-angular';
   styleUrls: ['./client-details.component.scss']
 })
 export class ClientDetailsComponent implements OnInit {
+  messages: string[] = [];
   // variables
   loggedInUser: any = null; // Store logged-in user info
   rowData: any[] = [];
@@ -68,12 +70,20 @@ export class ClientDetailsComponent implements OnInit {
   }
   
   // If you have a ClientService, inject it instead of HttpClient.
-  constructor(private http: HttpClient, private commonService: CommonService, private router: Router) {}
+  constructor(private http: HttpClient, private chatService: ChatService,
+    private commonService: CommonService, private router: Router) {}
 
   ngOnInit(): void {
     //this.all();
     this.loggedInUser = this.commonService.getLoggedInUser(); // Get logged-in user info (if needed for display)
     this.getPatients();
+    this.chatService.getMessages().subscribe(msg => {
+      this.messages.push(msg);
+    });
+  }
+
+  send(text: string) {
+    this.chatService.sendMessage(text);
   }
   
   getPatients(): void {
@@ -99,6 +109,7 @@ export class ClientDetailsComponent implements OnInit {
         this.pendingAmount = this.rowData.reduce((sum, item) => sum + (item.paymentStatus !== 'paid' ? Number(item.Amount) || 0 : 0), 0); 
         this.paidAmount = this.rowData.reduce((sum, item) => sum + (item.paymentStatus === 'paid' ? Number(item.Amount) || 0 : 0), 0);
         this.totalCollection = this.rowData.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);
+        this.send('message ' + this.pendingAmount + ' ' + this.paidAmount + ' ' + this.totalCollection);
       },
       error: (err) => {
         //this.error = this.(err);
@@ -108,6 +119,7 @@ export class ClientDetailsComponent implements OnInit {
   }
 createClient(): void {
   this.router.navigate(['add-client']);
+  
     // Implement client creation logic here, e.g., navigate to a form for creating a new client.
   }
   editClient(): void {

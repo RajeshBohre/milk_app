@@ -1,0 +1,16 @@
+<h2>Add/Edit Inventory Item</h2>
+<form>
+    <div class="mb-3">
+        <label for="product" class="form-label">Product</label>
+        <input type="text" class="form-control" id="product" [(ngModel)]="inventoryItem.product" name="product">
+    </div>
+    <div class="mb-3">
+        <label for="quantity" class="form-label">Quantity</label>
+        <input type="number" class="form-control" id="quantity" [(ngModel)]="inventoryItem.quantity" name="quantity">
+    </div>
+    <div class="mb-3">
+        <label for="price" class="form-label">Price</label>
+        <input type="number" class="form-control" id="price" [(ngModel)]="inventoryItem.price" name="price">
+    </div>
+    <button type="submit" class="btn btn-primary" (click)="saveInventoryItem()">Save</button>
+</form>

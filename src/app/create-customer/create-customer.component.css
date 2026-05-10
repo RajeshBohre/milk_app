@@ -1,0 +1,56 @@
+    .bill-form-wrapper {
+        max-width: 640px;
+        margin: 5px auto;
+        padding: 2px;
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .form-header {
+        background: #e9ecef;
+        padding: 6px;
+        text-align: center;
+        border-radius: 6px;
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+
+    form .form-row {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 8px;
+    }
+
+    form label {
+        margin-bottom: 6px;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+
+    form input[type="text"],
+    form input[type="number"],
+    form input[type="date"],
+    form select {
+        padding: 8px 10px;
+        font-size: 1rem;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+
+    .actions {
+        text-align: center;
+        margin-top: 12px;
+    }
+
+    button[type="submit"] {
+        background: #007bff;
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    button[type="submit"]:hover {
+        background: #0056b3;
+    }

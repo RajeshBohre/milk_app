@@ -24,6 +24,8 @@ export class AddEditKiranaClientComponent {
   displayModal: boolean = false;
   userName: string = '';
   paymentStatus: string = 'Pending';
+  payment: string = '';
+  customers: any[] = []; // To store customer list for dropdown
   today: string = ''; // To store the formatted date string
   constructor(private commonService: CommonService, private route: ActivatedRoute) {}
   ngOnInit(): void {
@@ -36,6 +38,7 @@ export class AddEditKiranaClientComponent {
     this.today = `${year}-${month}-${day}`;
     this.billDate = now; // Set the default bill date to today
     this.userName = this.commonService.getLoggedInUser()?.userName || '';
+    this.getCustomerDetails();
     // Load all bills to find the one we want to edit (for demo purposes)
       this.routeSub = this.route.paramMap.subscribe((params: ParamMap) => {
       // first try route param
@@ -57,6 +60,18 @@ export class AddEditKiranaClientComponent {
   ngOnDestroy() {
     this.routeSub.unsubscribe(); // Prevents memory leaks
   }
+  getCustomerDetails() {
+    const req = { userName: this.userName };
+    this.commonService.getCustomer(req).subscribe({
+      next: (data) => {
+       this.customers = data;
+      },
+      error: (err) => {
+        //this.error = this.(err);
+        
+      }
+    });
+  }
   getBills(id: string): void {
     const req = { userName: this.userName };
     this.commonService.getDetailsKirana(req).subscribe({
@@ -69,6 +84,7 @@ export class AddEditKiranaClientComponent {
             this.Amount = b.Amount;
             this.billDate = b.billDate;
             this.paymentStatus = b.paymentStatus;
+
             
           }
         });
@@ -91,7 +107,9 @@ export class AddEditKiranaClientComponent {
       billDate: this.billDate,
       userName: this.userName,
       paymentStatus: this.paymentStatus,
-     
+      payment: this.payment,
+      customerId: this.customers.find(c => c.Name === this.Name)?.customerId || null,
+
       ...(this.id ? { _id: this.id } : {}) // include _id only if we have an id (for update)
     };
     if(this.id) {

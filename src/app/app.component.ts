@@ -11,7 +11,7 @@ import { CommonService } from './services/common.services';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [FormsModule, ReactiveFormsModule, CommonModule, RouterOutlet],
+  imports: [FormsModule, ReactiveFormsModule, CommonModule, RouterOutlet, ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
@@ -30,14 +30,43 @@ export class AppComponent {
   constructor(private router: Router, private commonService: CommonService) {}
   ngOnInit(): void {
     this.userName = this.commonService.getLoggedInUser()?.name || '';
+    this.commonService.message$.subscribe(msg => {
+      this.isValidated = msg;
+      console.log('Received:', msg);
+    });
   }
   onLogin() {
     this.islogin = true;
     this.router.navigate(['login']);
     if (this.commonService.getLoggedInUser()) {
+      
       this.router.navigate(['home']);
     } else {
       this.router.navigate(['login']);
     }
+  }
+   onPaymentTabClick() {
+    this.router.navigate(['payment-history']);
+  }
+  onClientTabClick() {
+    if (this.commonService.getLoggedInUser().businessType === 'Milk') {
+            this.router.navigate(['client-details']);
+          } else if (this.commonService.getLoggedInUser().businessType === 'Kirana') {
+            this.router.navigate(['kirana-client-details']);
+          } else {
+            this.router.navigate(['home']);
+          }
+  }
+  onClickInventory() {
+    if (this.commonService.getLoggedInUser().businessType === 'Milk') {
+            this.router.navigate(['milk-inventory']);
+          } else if (this.commonService.getLoggedInUser().businessType === 'Kirana') {
+            this.router.navigate(['inventory']);
+          } else {
+            this.router.navigate(['home']);
+          }
+  }
+  onCreateCustomer() {
+    this.router.navigate(['create-customer']);
   }
 }

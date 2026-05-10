@@ -15,6 +15,7 @@
     <button class="btn btn-primary" type="button" (click)="paymentToClient()" [disabled]="false">Payment</button>
     <button class="btn btn-danger" type="button" (click)="downloadPdf()" [disabled]="false"> PDF</button>
 <input type="text" placeholder="Search..." (input)="onQuickFilterChanged($event)" style="padding: 5px; border: 1px solid #ccc; border-radius: 4px;">
+<button type="button" placeholder="Send Message" (click)="send('test message')" style="padding: 5px; border: 1px solid #ccc; border-radius: 4px;">Send Message</button>
 </div>
 <div class="client-details" style="margin-top: 5px;">
     <!-- Toolbar: quick filter, actions -->

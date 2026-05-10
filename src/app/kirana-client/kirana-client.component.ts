@@ -24,6 +24,8 @@ import { set } from 'mongoose';
 export class KiranaClientDetailsComponent implements OnInit {
   // variables
   loggedInUser: any = null; // Store logged-in user info
+  totalCredit: number = 0;
+  totalDebit: number = 0;
   rowData: any[] = [];
   defaultColDef = {
     sortable: true,
@@ -48,11 +50,11 @@ export class KiranaClientDetailsComponent implements OnInit {
       resizable: true
     },
     { headerName: 'Customer Name', field: 'Name', minWidth: 100 },
-    { headerName: 'Amount', field: 'Amount', minWidth: 60,maxWidth: 120, },
-    
+    { headerName: 'Debit', field: 'Amount', minWidth: 60,maxWidth: 120, },
+    { headerName: 'Credit', field: 'payment', minWidth: 60,maxWidth: 120, },
     { headerName: 'Date', field: 'billDate', minWidth: 200 },
     { headerName: 'Payment Status', field: 'paymentStatus', minWidth: 150 },
-    { headerName: 'Comment', field: 'comment', minWidth: 350 },
+    { headerName: 'Item Names', field: 'comment', minWidth: 350 },
 
   ];
   loading = false;
@@ -75,34 +77,10 @@ export class KiranaClientDetailsComponent implements OnInit {
     //this.all();
     this.loggedInUser = this.commonService.getLoggedInUser(); // Get logged-in user info (if needed for display)
     this.getPatients();
-    this.receivedPaymentAmount();
+    
    
   }
-  receivedPaymentAmount() {
-    this.commonService.getPaymentDetails(this.loggedInUser).subscribe({
-      next: (data) => {
-        this.paymentData = data;
-        this.TodayPaymentReceived = Array.isArray(data) ? data.reduce((sum, item) => {
-          const today = new Date();
-          const itemDate = new Date(item.paymentDate);
-          const isToday = itemDate.getDate() === today.getDate() &&
-                          itemDate.getMonth() === today.getMonth() &&
-                          itemDate.getFullYear() === today.getFullYear();
-          return sum + (isToday ? Number(item.amount) || 0 : 0);
-        }, 0) : 0;
-        data.forEach((payment: any) => {
-          if (payment.paymentStatus !== 'paid') {
-            this.receivedPayment += Number(payment.amount) || 0;
-            //this.TodayPaymentReceived += Number(payment.amount) || 0;
-          }
-        });
-        //this.receivedPayment = data?.amount || 0;
-        
-      }
-      
-    });
-    
-  }
+  
   getPatients(): void {
     this.loading = true;
     this.error = null;
@@ -127,15 +105,46 @@ export class KiranaClientDetailsComponent implements OnInit {
           const yyyy = d.getFullYear();
           return `${dd}-${mm}-${yyyy}`;
         };
-
+        
+       
         this.rowData = Array.isArray(data)
           ? data.map((item: any) => ({ ...item, billDate: formatDate(item.billDate) }))
           : [];
+         
         this.loading = false;
+        this.totalCredit = this.rowData.reduce((sum, item) => sum + (Number(item.Amount) || 0), 0);
+        this.totalDebit = this.rowData.reduce((sum, item) => sum + (Number(item.payment) || 0), 0);
+        this.TodayPaymentReceived = Array.isArray(data) ? data.reduce((sum, item) => {
+          const today = new Date();
+          const itemDate = new Date(item.billDate);
+          const isToday = itemDate.getDate() === today.getDate() &&
+                          itemDate.getMonth() === today.getMonth() &&
+                          itemDate.getFullYear() === today.getFullYear();
+          return sum + (isToday ? Number(item.payment) || 0 : 0);
+        }, 0) : 0;  
+          
+        this.receivedPayment = Array.isArray(data) ? data.reduce((sum, item) => sum + (Number(item.payment) || 0), 0) : 0;
         this.pendingAmount = this.rowData.reduce((sum, item) => sum + (item.paymentStatus !== 'paid' ? Number(item.Amount) || 0 : 0), 0); 
         this.paidAmount = this.rowData.reduce((sum, item) => sum + (item.paymentStatus === 'paid' ? Number(item.Amount) || 0 : 0), 0);
         this.totalCollection = this.rowData.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);
-        
+        this.rowData.forEach((item: any) => {
+          const customerPayment = this.paymentData.find(p => p.customerId === item.customerId);
+          
+          if (customerPayment) {
+            const pendingAmt = Number(item.Amount) || 0;
+            const receivedAmt = Number(customerPayment.amount) || 0;
+            
+            if (receivedAmt === 0) {
+              item.paymentStatus = 'Unpaid';
+            } else if (pendingAmt === receivedAmt) {
+              item.paymentStatus = 'paid';
+            } else {
+              item.paymentStatus = 'partially paid';
+            }
+          } else {
+            item.paymentStatus = 'Unpaid';
+          }
+        });
 
       },
       error: (err) => {
@@ -265,9 +274,34 @@ createClient(): void {
       this.tempData = this.rowData.filter(item => item.Name.toLowerCase().includes(filterValue.toLowerCase()));
       
     }
-    tempPaymentData = this.paymentData.filter(item => item.Name.toLowerCase().includes(filterValue.toLowerCase()));
+    tempPaymentData = this.tempData.filter(item => item.paymentStatus === 'paid');
     this.pendingAmount = this.tempData.reduce((sum, item) => sum + (item.paymentStatus !== 'paid' ? Number(item.Amount) || 0 : 0), 0);
-    this.receivedPayment = tempPaymentData.reduce((sum, item) => sum +  Number(item.amount), 0);
+    this.receivedPayment = this.tempData.reduce((sum, item) => sum + (Number(item.payment) || 0), 0);
+    this.rowData.forEach((item: any) => {
+          if (item.paymentStatus === 'Unpaid') {
+            const customerId = item.customerId;
+            const customerPayment = tempPaymentData.find(p => p.customerId === customerId);
+            const customerPending = this.tempData.find(d => d.customerId === customerId);
+
+            if (customerPayment) {
+              const pendingAmt = Number(customerPending?.Amount) || 0;
+              const receivedAmt = Number(customerPayment?.amount) || 0;
+              
+              if (receivedAmt === 0) {
+                item.paymentStatus = 'Unpaid';
+              } else if (pendingAmt === receivedAmt) {
+                item.paymentStatus = 'paid';
+              } else {
+                item.paymentStatus = 'partially paid';
+              }
+            } else {
+              item.paymentStatus = 'Unpaid';
+            }
+          }
+        }); 
+  }
+  onPaymentTabClick() {
+    this.router.navigate(['payment-history']);
   }
 //   clickMethod(name: string):void {
 //   if(window.confirm("Are you sure you want to delete " + name + "?")) {

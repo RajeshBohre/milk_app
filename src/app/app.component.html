@@ -110,6 +110,24 @@
             </div>
         </div>
     </section>
+   <ul class="nav nav-tabs" role="tablist" *ngIf="isValidated" style="margin-top: 10px;">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="customer-tab"  (click)="onClientTabClick()"
+        data-bs-toggle="tab" data-bs-target="#customer" type="button" role="tab" aria-controls="customer" aria-selected="true">Customer Details</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="new-customer-tab"  (click)="onCreateCustomer()"
+        data-bs-toggle="tab" data-bs-target="#new-customer" type="button" role="tab" aria-controls="new-customer" aria-selected="true">New Customer</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="payment-tab" data-bs-toggle="tab" data-bs-target="#payment" type="button" role="tab" 
+        (click)="onPaymentTabClick()" aria-controls="payment" aria-selected="false">Payment History</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button (click)="onClickInventory()" class="nav-link" id="inventory-tab" data-bs-toggle="tab" data-bs-target="#inventory" type="button" role="tab" aria-controls="inventory" aria-selected="false">Inventory Details</button>
+    </li>
+</ul>
+
     <router-outlet *ngIf="islogin"></router-outlet>
     <!-- Download Section -->
     <section id="download" class="py-5 text-center">

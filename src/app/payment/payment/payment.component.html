@@ -1,30 +1,45 @@
-<div class="bill-form-wrapper">
-    <div class="form-header">Payment Form</div>
+<div class="ledger-container">
+    <h2>Ledger Form</h2>
+    
+    <div class="ledger-content">
+        <div class="form-section">
+            <form [formGroup]="ledgerForm" (ngSubmit)="onSubmit()">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="date">Date</label>
+                        <input type="date" id="date" formControlName="date" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="particulars">Particulars (Item/Customer Name)</label>
+                        <input type="text" id="particulars" formControlName="particulars" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="billNo">Bill No.</label>
+                        <input type="text" id="billNo" formControlName="billNo" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="cashDr">Cash (Dr.)</label>
+                        <input type="number" id="cashDr" (ngModelChange)="updateBalance()" formControlName="cashDr" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="expensesCr">Expenses (Cr.)</label>
+                        <input type="number" id="expensesCr" (ngModelChange)="updateBalance()" formControlName="expensesCr" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="balance">Balance</label>
+                        <input type="number" id="balance" formControlName="balance" class="form-control" readonly>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Add Entry</button>
+            </form>
+        </div>
 
-    <form>
-        <div class="form-row">
-            <label for="Name">Name</label>
-            <input id="Name" name="Name" [(ngModel)]="Name" type="text" placeholder="Enter name" required />
-        </div>
-        <div class="form-row">
-            <label for="milkType">Amount</label>
-            <input id="amount" name="amount" [(ngModel)]="amount" type="text" placeholder="Enter amount" required />
-        </div>
-        <div *ngIf="isMultiplePayments" class="form-row">
-            <label for="startDate">Start Date</label>
-            <input id="startDate" name="startDate" [(ngModel)]="startDate" type="date" required />
-        </div>
-        <div *ngIf="isMultiplePayments" class="form-row">
-            <label for="endDate">End Date</label>
-            <input id="endDate" name="endDate" [(ngModel)]="endDate" type="date" required />
-        </div>
-        <div class="form-row">
-            <label for="paymentDate">Date</label>
-            <input id="paymentDate" name="paymentDate" [(ngModel)]="paymentDate" type="date" required />
-        </div>
-        <div class="actions">
-            <button type="submit" (click)="onSubmit()">Save</button>
-             <button style="margin-left: 10px;" type="submit" (click)="backToList()">Back</button>
-        </div>
-    </form>
+        
+    </div>
 </div>

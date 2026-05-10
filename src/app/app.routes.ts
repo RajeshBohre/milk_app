@@ -6,6 +6,10 @@ import { BillAddEditComponent } from './bill-add-edit/bill-add-edit.component';
 import { PaymentComponent } from './payment/payment/payment.component';
 import { KiranaClientDetailsComponent } from './kirana-client/kirana-client.component';
 import { AddEditKiranaClientComponent } from './add-edit-kirana-client/add-edit-kirana-client.component';
+import { PaymentHistoryComponent } from './payment-history/payment-history.component';
+import { InventoryDetailsComponent } from './inventory-details/inventory-details.component';
+import { AddEditInventoryComponent } from './add-edit-inventory/add-edit-inventory.component';
+import { CreateCustomerComponent } from './create-customer/create-customer.component';
 
 
 export const routes: Routes = [
@@ -19,5 +23,11 @@ export const routes: Routes = [
   { path: 'kirana-client-details', component: KiranaClientDetailsComponent },
   { path: 'add-kirana-client', component: AddEditKiranaClientComponent },
   { path: 'edit-kirana-client/:id', component: AddEditKiranaClientComponent },
+  { path: 'payment-history', component: PaymentHistoryComponent },
+  { path: 'inventory', component: InventoryDetailsComponent },
+  { path : 'add-inventory', component: AddEditInventoryComponent },
+  { path : 'edit-inventory/:id', component: AddEditInventoryComponent },
+  { path: 'create-customer', component: CreateCustomerComponent },
+  { path: '', redirectTo: 'login', pathMatch: 'full' }, // Default route
   { path: '**', redirectTo: 'login' }
 ];

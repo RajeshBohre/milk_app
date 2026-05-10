@@ -1,0 +1,43 @@
+
+
+<div class="bill-form-wrapper">
+    <div class="form-header">Add New Customer</div>
+
+    <form>
+        <div class="form-row">
+            <label for="Name">Name</label>
+            <input id="Name" name="Name" [(ngModel)]="Name" type="text" placeholder="Enter name" required />
+        </div>
+       
+        
+        <div class="form-row">
+            <label for="Address">Address</label>
+            <input id="Address" name="Address" [(ngModel)]="Address" type="text" placeholder="Enter address"/>
+        </div>
+
+         <div class="form-row">
+            <label for="ContactNumber">Contact Number</label>
+            <input id="ContactNumber" name="ContactNumber" [(ngModel)]="contactNumber" type="text" placeholder="Enter contact number"/>
+        </div>
+
+        <div class="form-row">
+            <label for="billDate">Create Date</label>
+            <input id="billDate" name="billDate" [(ngModel)]="createdDate" type="date" required />
+        </div>
+        <div class="form-row">
+            <label for="previousBalance">Previous Balance</label>
+            <input id="previousBalance" name="previousBalance" [(ngModel)]="previousBalance" type="number" placeholder="Enter previous balance" />
+        </div>
+
+        <div class="form-row">
+            <label for="comment">Comment</label>
+            <textarea id="comment" name="comment" [(ngModel)]="comment" placeholder="Enter any comments" rows="4"></textarea>
+        </div>
+
+        <div class="actions">
+            <button type="submit" (click)="onSubmit()">Save</button>
+             <button style="margin-left: 10px;" type="submit" (click)="backToList()">Back</button>
+        </div>
+
+    </form>
+</div>

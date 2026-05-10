@@ -6,13 +6,20 @@
     <form>
         <div class="form-row">
             <label for="Name">Name</label>
-            <input id="Name" name="Name" [(ngModel)]="Name" type="text" placeholder="Enter name" required />
+            <select id="Name" name="Name" [(ngModel)]="Name" required>
+                <option *ngFor="let customer of customers" [value]="customer.Name">{{ customer.Name }}</option>
+            </select>
         </div>
        
         
         <div class="form-row">
-            <label for="Amount">Amount</label>
+            <label for="Amount">Debit Amount</label>
             <input id="Amount" name="Amount" [(ngModel)]="Amount" type="number" step="0.01" min="0" placeholder="0.00" required />
+        </div>
+
+        <div class="form-row">
+            <label for="payment">Credit Amount</label>
+            <input id="payment" name="payment" [(ngModel)]="payment" type="number" step="0.01" min="0" placeholder="0.00" required />
         </div>
 
         <div class="form-row">
@@ -23,6 +30,7 @@
             <label for="paymentStatus">Payment Status</label>
             <select id="paymentStatus" name="paymentStatus" [(ngModel)]="paymentStatus" required>
                 <option value="" disabled selected>Select payment status</option>
+                <option value="Paid">Partially Paid</option>
                 <option value="Paid">Paid</option>
                 <option value="Unpaid">Unpaid</option>
             </select>

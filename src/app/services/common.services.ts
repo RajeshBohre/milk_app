@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
+import { Observable, Subject, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 @Injectable({
     providedIn: 'root'
@@ -8,8 +8,14 @@ import { catchError } from 'rxjs/operators';
 export class CommonService {
     // baseUrl should point to your backend (set in environment.ts)
     //private baseUrl: string = 'http://localhost:8084/api';
-    private baseUrl: string = 'https://milk-app-i64g.onrender.com/api';
-
+    private baseUrl: string = 'https://hisabkitab-backend.onrender.com/api';
+    private messageSource = new Subject<boolean>();
+    //dns1.p05.nsone.net
+    //dns2.p05.nsone.net
+    //dns3.p05.nsone.net
+    //dns4.p05.nsone.net
+  // Expose as Observable so components can't call .next() directly
+  message$ = this.messageSource.asObservable();
     constructor(private http: HttpClient) {}
     userRegister(req: any): Observable<any> {
         const url = `${this.baseUrl}/userInsert`; // adjust route to match your backend
@@ -29,6 +35,9 @@ export class CommonService {
      * Example backend expected payload:
      * { id: '...', update: { fieldA: 'newValue' } }
      */
+    sendMessage(message: boolean) {
+    this.messageSource.next(message);
+  }
     updateEntry(req: any): Observable<any> {
         const url = `${this.baseUrl}/updateEntry`; // adjust route to match your backend
         //const body = { id, update };
@@ -47,6 +56,27 @@ export class CommonService {
             catchError(this.handleError)
         );
     }
+    createNewCustomer(req: any): Observable<any> {
+        const url = `${this.baseUrl}/insertCustomer`; // adjust route to match your backend
+        //const body = { id, update };
+        const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+
+        return this.http.post<any>(url, req, { headers }).pipe(
+            catchError(this.handleError)
+        );
+    }
+    getCustomerCount(req: any): Observable<any> {
+        const url= `${this.baseUrl}/getCustomerCount/${req.userName}`; // adjust route to match your backend
+        return this.http.get<any>(url).pipe(
+            catchError(this.handleError)
+        );
+    }
+    getCustomer(req: any): Observable<any> {
+        const url = `${this.baseUrl}/getCustomer/${req.userName}`; // adjust route to match your backend
+        return this.http.get<any>(url).pipe(
+            catchError(this.handleError)
+        );
+    }   
     createKiranaEntry(req: any): Observable<any> {
         const url = `${this.baseUrl}/insertKiranaEntry`; // adjust route to match your backend
         //const body = { id, update };
@@ -88,6 +118,13 @@ export class CommonService {
             catchError(this.handleError)
         );
     }
+    insertInventoryEntry(req:any): Observable<any> {
+        const url = `${this.baseUrl}/insertInventory`;
+        const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+        return this.http.post<any>(url, req, { headers }).pipe(
+            catchError(this.handleError)
+        );
+    }
     getPaymentDetails(req: any): Observable<any> {
         const url = `${this.baseUrl}/getPaymentEntry/${req.userName}`; // adjust route to match your backend
         return this.http.get<any>(url).pipe(
@@ -123,5 +160,18 @@ export class CommonService {
     getLoggedInUser(): any {
         const userJson = localStorage.getItem('loggedInUser');
         return userJson ? JSON.parse(userJson) : null;
-    }   
+    }  
+    setLoggedInSuccess(isSuccess: boolean) {
+        localStorage.setItem('isLoginSuccess', JSON.stringify(isSuccess));
+    }
+    getLoggedInSuccess(): boolean {
+        const successJson = localStorage.getItem('isLoginSuccess');
+        return successJson ? JSON.parse(successJson) : false;
+    } 
+    getPaymentHistory(req: any): Observable<any> {
+        const url = `${this.baseUrl}/getPaymentEntry/${req.userName}`; // adjust route to match your backend
+        return this.http.get<any>(url).pipe(
+            catchError(this.handleError)
+        );
+    }
 }

@@ -1,7 +1,12 @@
 var express = require('express');
 
+const http = require('http');
+const { Server } = require('socket.io');
 var app = express();
 var path = require("path");
+
+const server = http.createServer(app);
+
 var cors = require('cors')
 var bodyParser = require('body-parser');
 //var studentModel = require('./student-model');
@@ -9,16 +14,6 @@ var mongo = require("mongoose");
 //const axios = require("axios");
 //const fast2sms = require('fast2sms');
 
-const { type } = require('os');
-const options = {
-    // Find your API key in the Fast2SMS Dev API section
-   // API_KEY: 'aQFLm94GnDbCPNX3KlT61rpWt2BVkwAZMSIERq8iHOyU7gjocJsYFUj30Ro6SngcXr9DQHKihtuJTq7b',
-
-    // Optional settings can be added here (e.g., sender_id, language, route)
-    // sender_id: 'FSTSMS', 
-    // language: 'english',
-    // route: 'qt' // Quick transactional route
-};
 // fast2sms.init(options);
 // const messageDetails = {
 //     message: 'test message from my app', // The SMS content
@@ -116,6 +111,48 @@ const createNewCollection = async (collectionName) => {
         throw error;
     }
 }
+var newCustomerSchema = new Schema({
+    customerId: { type: String, required: true },
+    Name: { type: String, required: true },
+    Address: { type: String, required: true },
+    contactNumber: { type: String, required: true },
+    createdDate: { type: Date, required: true },
+    comment: { type: String, required: false },
+    previousBalance: { type: Number, required: true }
+}, { versionKey: false });
+app.post("/api/insertCustomer", function (req, res) {
+const newCustomerModel = mongo.model(req.body.userName + '_customer', newCustomerSchema, req.body.userName + '_customer');
+    var mod = new newCustomerModel(req.body);
+    if (req.body) {
+        mod.save(function (err, data) {
+            if (err) {
+                res.send(err);
+            } else {
+                res.send({ data: "Record has been Inserted..!!" });
+            }
+        });
+    }
+});
+app.get("/api/getCustomer/:userName", function (req, res) {
+    const newCustomerModel = mongo.model(req.params.userName + '_customer', newCustomerSchema, req.params.userName + '_customer');
+    newCustomerModel.find({}, function (err, data) {
+        if (err) {
+            res.send(err);
+        } else {
+            res.send(data);
+        }
+    });
+});
+app.get("/api/getCustomerCount/:userName", function (req, res) {
+    const newCustomerModel = mongo.model(req.params.userName + '_customer', newCustomerSchema, req.params.userName + '_customer');
+    newCustomerModel.countDocuments({}, function (err, count) {
+        if (err) {
+            res.send(err);
+        } else {
+            res.send({ count: count });
+        }
+    });
+});
 var entrySchema = new Schema({
     Name: { type: String, required: true },
     quantity: { type: String, required: true },
@@ -142,10 +179,12 @@ const currEntryModel = mongo.model(req.body.userName + 'db', entrySchema, req.bo
 });
 var entryKiranaSchema = new Schema({
     Name: { type: String, required: true },
-    Amount: { type: String, required: true },
+    Amount: { type: String, required: false },
     billDate: { type: Date, required: true },
     comment: { type: String, required: false },
-    paymentStatus: {type: String, required: true}
+    paymentStatus: {type: String, required: true},
+    payment: { type: String, required: false },
+    customerId: { type: String, required: true }
 }, { versionKey: false });
 app.post("/api/insertKiranaEntry", function (req, res) {
 const kiranaEntryModel = mongo.model(req.body.userName + 'db', entryKiranaSchema, req.body.userName + 'db');
@@ -161,12 +200,14 @@ const kiranaEntryModel = mongo.model(req.body.userName + 'db', entryKiranaSchema
     }
 });
 var paymentSchema = new Schema({
-    Name: { type: String, required: true },
-    
-    amount: { type: String, required: true },
-    paymentDate: { type: Date, required: true },
-    id: { type: String, required: true }
-    
+    date: { type: Date, required: true },
+    particulars: { type: String, required: true },
+    billNo: { type: String, required: false },
+    cashDr: { type: String, required: false },
+    expensesCr: { type: String, required: false },
+    balance: { type: String, required: false },
+    userName: { type: String, required: true }
+
 }, { versionKey: false });
 app.post("/api/paymentEntry", function (req, res) {
 const currPaymentModel = mongo.model(req.body.userName + '_payment_db', paymentSchema, req.body.userName + '_payment_db');
@@ -323,8 +364,33 @@ app.patch("/api/updateBacklog",function(req,res){
     res.send({data:"Record has been Updated..!!"});
     }});
 })
+inventorySchema = new Schema({
+    product: { type: String, required: true },
+    quantity: { type: String, required: true },
+    price: { type: String, required: true }
+}, { versionKey: false });
+app.post("/api/insertInventory", function (req, res) {
+    const currInventoryModel = mongo.model(req.body.userName + '_inventory_db', inventorySchema, req.body.userName + '_inventory_db');
+    var mod = new currInventoryModel(req.body);
+    if (req.body) {
+        mod.save(function (err, data) {
+            if (err) {
+                res.send(err);
+            } else {
+                res.send({ data: "Record has been Inserted..!!" });
+            }
+        });
+    }
 
+});
+io.on('connection', (socket) => {
+  console.log('Client connected:', socket.id);
+  
+  socket.on('message', (data) => {
+    io.emit('message', data); // Broadcast to all clients
+  });
+});
 var port = process.env.PORT || 8084;
-app.listen(port, function () {
+server.listen(port, function () {
     console.log('Example app listening on port 8084!')
 })

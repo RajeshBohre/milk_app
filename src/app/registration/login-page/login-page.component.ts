@@ -55,6 +55,7 @@ export class LoginPageComponent {
         } else {
           // Handle successful login
           alert('Login successful!');
+          this.commonService.sendMessage(true); // Set login success status in the service
           if (this.commonService.getLoggedInUser().businessType === 'Milk') {
             this.router.navigate(['client-details']);
           } else if (this.commonService.getLoggedInUser().businessType === 'Kirana') {
@@ -68,5 +69,6 @@ export class LoginPageComponent {
       this.isRegistration = true;
       this.router.navigate(['registration']);
     }
+   
 
 }
